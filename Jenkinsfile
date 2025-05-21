@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'my-python-app'
-        DOCKER_USERNAME = 'ton_username_dockerhub'
-        DOCKER_PASSWORD = 'ton_mot_de_passe_dockerhub'
+        DOCKER_USERNAME = 'abde2020'
+        DOCKER_PASSWORD = 'abdelmoula0101'
     }
 
     stages {
