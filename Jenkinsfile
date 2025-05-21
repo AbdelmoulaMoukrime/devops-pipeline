@@ -1,32 +1,36 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
+        IMAGE_NAME = 'my-python-app'
     }
+
     stages {
         stage('Build') {
             steps {
-                bat 'docker build -t my-python-app .'
+                bat "docker build -t ${IMAGE_NAME} ."
             }
         }
+
         stage('Test') {
             steps {
                 bat 'echo "Tests ici (optionnel)"'
             }
         }
+
         stage('Push to Docker Hub') {
             steps {
-                bat 'docker login -u ${DOCKER_HUB_CREDENTIALS_USR} -p ${DOCKER_HUB_CREDENTIALS_PSW}'
-                bat 'docker tag my-python-app ${DOCKER_HUB_CREDENTIALS_USR}/my-python-app:latest'
-                bat 'docker push ${DOCKER_HUB_CREDENTIALS_USR}/my-python-app:latest'
+                withCredentials([usernamePassword(credentialsId: 'DOCKER_HUB_CREDENTIALS', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
+                    bat "docker tag ${IMAGE_NAME} $DOCKER_USERNAME/${IMAGE_NAME}:latest"
+                    bat "docker push $DOCKER_USERNAME/${IMAGE_NAME}:latest"
+                }
             }
         }
+
         stage('Deploy') {
             steps {
-                bat 'ssh user@remote-server "docker pull ${DOCKER_HUB_CREDENTIALS_USR}/my-python-app:latest"'
-                bat 'ssh user@remote-server "docker stop my-python-app || true"'
-                bat 'ssh user@remote-server "docker rm my-python-app || true"'
-                bat 'ssh user@remote-server "docker run -d -p 5000:5000 --name my-python-app ${DOCKER_HUB_CREDENTIALS_USR}/my-python-app:latest"'
+                echo 'Déploiement ici...'
             }
         }
     }
